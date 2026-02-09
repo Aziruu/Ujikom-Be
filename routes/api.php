@@ -13,6 +13,7 @@ Route::post('/login/guru', [AuthController::class, 'loginGuru']);
 // Pintu Tertutup (Harus Punya Token)
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/teachers', TeacherController::class);
+    Route::get('/attendance/history', [AttendanceController::class, 'index']);
     Route::put('/teachers/{id}/rfid', [TeacherController::class, 'updateRfid']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/attendance', [AttendanceController::class, 'store']);

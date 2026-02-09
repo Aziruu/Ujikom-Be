@@ -10,10 +10,26 @@ use Illuminate\Support\Facades\Hash;
 class TeacherController extends Controller
 {
     // 1. LIHAT SEMUA GURU
-    public function index()
+    public function index(Request $request)
     {
-        $teachers = Teacher::orderBy('created_at', 'desc')->get();
-        return response()->json(['success' => true, 'data' => $teachers]);
+        $query = Teacher::query();
+
+        // 2. Cek ada pencarian gak? (Search by Name atau NIP)
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('nip', 'like', "%{$search}%");
+            });
+        }
+
+        // 3. Ambil data dengan Pagination (10 per halaman)
+        // 'latest()' biar yang baru ditambah muncul paling atas
+        $teachers = $query->latest()->paginate(10); 
+
+        // 4. Return format bawaan Laravel Pagination
+        // (Isinya sudah ada current_page, last_page, total, data, dll)
+        return response()->json($teachers);
     }
 
     // 2. TAMBAH GURU BARU

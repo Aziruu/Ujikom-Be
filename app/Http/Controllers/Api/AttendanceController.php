@@ -10,65 +10,104 @@ use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
+    public function index(Request $request)
+    {
+        // 1. Ambil Query Dasar + Relasi ke Guru
+        $query = Attendance::with('teacher')->latest();
+
+        // 2. Filter Pencarian (Nama atau NIP)
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->whereHas('teacher', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('nip', 'like', "%{$search}%");
+            });
+        }
+
+        // 3. Filter Tanggal (Opsional, biar bisa cek hari tertentu)
+        if ($request->has('date') && $request->date != '') {
+            $query->whereDate('date', $request->date);
+        }
+
+        // 4. Ambil data (Pagination biar gak berat kalau data ribuan)
+        // Kita ambil 50 data per halaman
+        $logs = $query->paginate(50);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $logs
+        ]);
+    }
+
     public function store(Request $request)
     {
-        // 1. Validasi input (Kita butuh UID kartunya dan metodenya)
+        // --- 1. VALIDASI DIPERBAIKI ---
         $request->validate([
-            'rfid_uid' => 'required|string',
-            'method'   => 'required|in:rfid,face,qrcode,manual', // Sesuai ENUM database
+            'method'      => 'required|in:rfid,face,qrcode,manual',
+            // RFID wajib CUMA kalau method = rfid
+            'rfid_uid'    => 'required_if:method,rfid',
+            // Teacher ID wajib CUMA kalau method = manual
+            'teacher_id'  => 'required_if:method,manual|exists:teachers,id',
         ]);
 
-        // 2. Cari Guru berdasarkan RFID UID
-        $teacher = Teacher::where('rfid_uid', $request->rfid_uid)->first();
+        $teacher = null;
 
+        // --- 2. LOGIC PENCARIAN GURU ---
+        if ($request->method === 'manual') {
+            $teacher = Teacher::find($request->teacher_id);
+        } else {
+            // Jika RFID, cari berdasarkan UID
+            $teacher = Teacher::where('rfid_uid', $request->rfid_uid)->first();
+        }
+
+        // Jika guru tidak ditemukan (RFID tidak terdaftar atau ID salah)
         if (!$teacher) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kartu tidak dikenali! Silakan daftar dulu.',
+                'message' => 'Data guru tidak ditemukan dalam sistem.',
             ], 404);
         }
 
-        // 3. Cek apakah hari ini dia sudah absen masuk?
+        // --- 3. CEK APAKAH SUDAH ABSEN HARI INI ---
         $today = Carbon::today();
         $attendance = Attendance::where('teacher_id', $teacher->id)
-                                ->where('date', $today)
-                                ->first();
+            ->where('date', $today)
+            ->first();
 
         if ($attendance) {
-            // Kalau sudah ada datanya, kita kabari saja (Nanti bisa dikembangin jadi Check-out)
             return response()->json([
-                'success' => false, // False biar frontend tau ini bukan absen baru
-                'message' => "Halo {$teacher->name}, kamu sudah absen masuk jam {$attendance->check_in} tadi.",
+                'success' => false,
+                'message' => "Halo {$teacher->name}, Anda sudah melakukan absensi masuk jam {$attendance->check_in}.",
                 'data'    => $attendance
             ], 200);
         }
 
-        // 4. Hitung status (Telat atau Hadir)
-        // Misal jam masuk jam 07:00. Lewat dari itu dianggap telat.
+        // --- 4. HITUNG KETERLAMBATAN ---
         $jamMasuk = Carbon::now();
-        $batasMasuk = Carbon::createFromTime(7, 0, 0); // Jam 07:00 pagi
-        
+        // Atur jam masuk (misal jam 07:00 pagi)
+        $batasMasuk = Carbon::createFromTime(7, 0, 0);
+
         $status = 'hadir';
         $lateDuration = 0;
 
         if ($jamMasuk->gt($batasMasuk)) {
             $status = 'telat';
-            $lateDuration = $jamMasuk->diffInMinutes($batasMasuk); // Hitung telat berapa menit
+            $lateDuration = $jamMasuk->diffInMinutes($batasMasuk);
         }
 
-        // 5. Simpan Absensi Baru
+        // --- 5. SIMPAN DATA ---
         $newAttendance = Attendance::create([
             'teacher_id'    => $teacher->id,
             'date'          => $today,
             'check_in'      => $jamMasuk->toTimeString(),
-            'method'        => $request->method, // 'rfid'
+            'method'        => $request->method,
             'status'        => $status,
             'late_duration' => $lateDuration
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => "Berhasil! Selamat bekerja, {$teacher->name}.",
+            'message' => "Absensi Berhasil! Selamat mengajar, {$teacher->name}.",
             'data'    => $newAttendance,
             'teacher' => $teacher
         ], 201);
