@@ -18,6 +18,9 @@ class Attendance extends Model
         'method',
         'status',
         'late_duration',
+        'photo_path',    // <--- TAMBAHAN BARU (Path Foto)
+        'latitude',      // (Opsional jika pakai)
+        'longitude',
     ];
 
     /**

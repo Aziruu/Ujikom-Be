@@ -24,7 +24,7 @@ class Teacher extends Model
     }
 
     //  > Relasi
-    
+
     // Guru punya banyak Absensi
     public function attendances()
     {
@@ -47,5 +47,11 @@ class Teacher extends Model
     public function homeroomClass()
     {
         return $this->hasOne(Classroom::class, 'homeroom_teacher_id');
+    }
+
+    // Relasi: Guru punya banyak Pengajuan Cuti
+    public function leaveRequests()
+    {
+        return $this->hasMany(LeaveRequest::class);
     }
 }

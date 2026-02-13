@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\LeaveController;
 
 // Pintu Masuk (Public)
 Route::post('/login/admin', [AuthController::class, 'loginAdmin']);
@@ -17,6 +18,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/teachers/{id}/rfid', [TeacherController::class, 'updateRfid']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/attendance', [AttendanceController::class, 'store']);
+
+    Route::post('/leaves', [LeaveController::class, 'store']); // Guru ajukan
+    Route::get('/leaves', [LeaveController::class, 'index']);  // Admin lihat
+    Route::put('/leaves/{id}/verify', [LeaveController::class, 'verify']); // Admin verifikasi
+
+    Route::put('/teachers/{id}/face', [App\Http\Controllers\Api\TeacherController::class, 'updateFace']);
 
     // Cek User Login
     Route::get('/user', function (Request $request) {
