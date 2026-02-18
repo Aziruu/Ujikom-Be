@@ -8,7 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Major extends Model
 {
     use HasFactory;
-    protected $guarded = ['id'];
+
+    protected $fillable = [
+        'code',
+        'name',
+        'head_of_program_id'
+    ];
 
     // Jurusan punya Kaprog (Guru)
     public function headOfProgram()
