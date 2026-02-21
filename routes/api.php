@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\Api\AcademicYearController;
+use App\Http\Controllers\Api\ClassroomController;
 use App\Http\Controllers\Api\MajorController;
 use App\Http\Controllers\Api\SubjectController;
 
@@ -32,6 +33,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('academic-years', AcademicYearController::class);
     Route::apiResource('majors', MajorController::class);
     Route::apiResource('subjects', SubjectController::class);
+    Route::apiResource('classrooms', ClassroomController::class);
 
     // Cek User Login
     Route::get('/user', function (Request $request) {
