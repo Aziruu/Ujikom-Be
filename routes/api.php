@@ -34,6 +34,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('majors', MajorController::class);
     Route::apiResource('subjects', SubjectController::class);
     Route::apiResource('classrooms', ClassroomController::class);
+    Route::apiResource('work-schedules', \App\Http\Controllers\Api\WorkScheduleController::class)->only(['index', 'update']);
 
     // Cek User Login
     Route::get('/user', function (Request $request) {
