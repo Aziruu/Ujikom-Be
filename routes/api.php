@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\AcademicYearController;
 use App\Http\Controllers\Api\ClassroomController;
 use App\Http\Controllers\Api\MajorController;
 use App\Http\Controllers\Api\SubjectController;
+use App\Http\Controllers\Api\TeachingScheduleController;
+use App\Http\Controllers\Api\WorkScheduleController;
 
 // Pintu Masuk (Public)
 Route::post('/login/admin', [AuthController::class, 'loginAdmin']);
@@ -34,7 +36,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('majors', MajorController::class);
     Route::apiResource('subjects', SubjectController::class);
     Route::apiResource('classrooms', ClassroomController::class);
-    Route::apiResource('work-schedules', \App\Http\Controllers\Api\WorkScheduleController::class)->only(['index', 'update']);
+    Route::apiResource('work-schedules', WorkScheduleController::class)->only(['index', 'update']);
+    Route::apiResource('teaching-schedules', TeachingScheduleController::class);
 
     // Cek User Login
     Route::get('/user', function (Request $request) {
