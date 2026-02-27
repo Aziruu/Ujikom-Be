@@ -13,7 +13,7 @@ class ClassroomController extends Controller
      */
     public function index()
     {
-        $classrooms = Classroom::with(['majors', 'academicYear', 'homeroomTeacher'])->latest()->get();
+        $classrooms = Classroom::with(['major', 'academicYear', 'homeroomTeacher'])->latest()->get();
 
         return response()->json(['success' => true, 'data' => $classrooms]);
     }
@@ -27,8 +27,9 @@ class ClassroomController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'grade_level' => 'required|integer|in:10,11,12',
-            'major_id' => 'required|exists:academic_years,id',
-            'homeroom_teacher_id' => 'required|exists:teachers,id'
+            'major_id' => 'required|exists:majors,id',
+            'academic_year_id' => 'required|exists:academic_years,id',
+            'homeroom_teacher_id' => 'nullable|exists:teachers,id'
         ]);
 
         Classroom::create($validated);
@@ -42,16 +43,17 @@ class ClassroomController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $classrooms = Classroom::findOrFail($id);
+        $classroom = Classroom::findOrFail($id);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'grade_level' => 'required|integer|in:10,11,12',
-            'major_id' => 'required|exists:academic_years,id',
-            'homeroom_teacher_id' => 'required|exists:teachers,id'
+            'major_id' => 'required|exists:majors,id',
+            'academic_year_id' => 'required|exists:academic_years,id',
+            'homeroom_teacher_id' => 'nullable|exists:teachers,id'
         ]);
 
-        $classrooms->update($validated);
+        $classroom->update($validated);
 
         return response()->json(['success' => true, 'message' => 'Data Kelas Berhasil di Ubah']);
     }
