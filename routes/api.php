@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\AcademicYearController;
 use App\Http\Controllers\Api\ClassroomController;
 use App\Http\Controllers\Api\MajorController;
 use App\Http\Controllers\Api\SubjectController;
+use App\Http\Controllers\Api\TeachingJournalController;
 use App\Http\Controllers\Api\TeachingScheduleController;
 use App\Http\Controllers\Api\WorkScheduleController;
 
@@ -38,6 +39,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('classrooms', ClassroomController::class);
     Route::apiResource('work-schedules', WorkScheduleController::class)->only(['index', 'update']);
     Route::apiResource('teaching-schedules', TeachingScheduleController::class);
+
+    //Jurnal Mengajar
+    Route::apiResource('teaching-journals', TeachingJournalController::class);
 
     // Cek User Login
     Route::get('/user', function (Request $request) {
