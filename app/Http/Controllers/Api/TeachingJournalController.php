@@ -101,6 +101,30 @@ class TeachingJournalController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $journal = TeachingJournal::findOrFail($id);
+
+        // Hapus file foto fisiknya dulu dari folder public
+        $photos = json_decode($journal->photo_evidence, true);
+        if (is_array($photos)) {
+            foreach ($photos as $photo) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($photo);
+            }
+        }
+
+        // Baru hapus datanya dari database
+        $journal->delete();
+
+        return response()->json(['success' => true, 'message' => 'Jurnal dan fotonya berhasil dihapus!']);
+    }
+
+    // Fungsi khusus buat ACC / Tolak Jurnal
+    public function verify(Request $request, $id)
+    {
+        $request->validate(['status' => 'required|in:valid,ditolak']);
+        $journal = TeachingJournal::findOrFail($id);
+        
+        $journal->update(['status' => $request->status]);
+
+        return response()->json(['success' => true, 'message' => 'Status jurnal berhasil diubah!']);
     }
 }

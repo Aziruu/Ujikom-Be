@@ -42,6 +42,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     //Jurnal Mengajar
     Route::apiResource('teaching-journals', TeachingJournalController::class);
+    Route::patch('teaching-journals/{id}/verify', [\App\Http\Controllers\Api\TeachingJournalController::class, 'verify']);
 
     // Cek User Login
     Route::get('/user', function (Request $request) {
