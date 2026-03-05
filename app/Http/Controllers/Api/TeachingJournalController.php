@@ -11,10 +11,31 @@ class TeachingJournalController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $journals = TeachingJournal::with(['teacher', 'classroom', 'schedule'])->latest()->get();
-        return response()->json(['success' => true, 'data' => $journals]);
+        $query = TeachingJournal::with(['teacher', 'classroom', 'schedule']);
+
+        // Fitur pencarian berdasarkan nama guru atau nama kelas
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('teacher', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            })->orWhereHas('classroom', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        $journals = $query->latest()->paginate(10);
+
+        return response()->json([
+            'success' => true, 
+            'data' => $journals->items(),
+            'meta' => [
+                'current_page' => $journals->currentPage(),
+                'last_page' => $journals->lastPage(),
+                'total' => $journals->total()
+            ]
+        ]);
     }
 
     /**
@@ -66,7 +87,7 @@ class TeachingJournalController extends Controller
         ]);
 
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'message' => 'Jurnal mengajar berhasil dikirim!',
             'data' => $journal
         ]);
@@ -122,7 +143,7 @@ class TeachingJournalController extends Controller
     {
         $request->validate(['status' => 'required|in:valid,ditolak']);
         $journal = TeachingJournal::findOrFail($id);
-        
+
         $journal->update(['status' => $request->status]);
 
         return response()->json(['success' => true, 'message' => 'Status jurnal berhasil diubah!']);

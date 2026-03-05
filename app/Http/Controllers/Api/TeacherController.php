@@ -20,10 +20,17 @@ class TeacherController extends Controller
                 ->orWhere('nip', 'like', "%{$search}%");
         }
 
-        $perPage = $request->query('per_page', 10);
-        return response()->json(
-            $query->latest()->paginate($perPage)
-        );
+        $teachers = $query->latest()->paginate(10);
+
+        return response()->json([
+            'success' => true, 
+            'data' => $teachers->items(),
+            'meta' => [
+                'current_page' => $teachers->currentPage(),
+                'last_page' => $teachers->lastPage(),
+                'total' => $teachers->total()
+            ]
+        ]);
     }
 
     public function store(Request $request)

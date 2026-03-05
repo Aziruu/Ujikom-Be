@@ -8,10 +8,28 @@ use Illuminate\Http\Request;
 
 class MajorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $majors = Major::with('headOfProgram')->latest()->get();
-        return response()->json(['success' => true, 'data' => $majors]);
+        $query = Major::with('headOfProgram');
+
+        // Fitur pencarian berdasarkan kode atau nama jurusan
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%")
+                ->orWhere('code', 'like', "%{$search}%");
+        }
+
+        $majors = $query->latest()->paginate(10);
+
+        return response()->json([
+            'success' => true,
+            'data' => $majors->items(),
+            'meta' => [
+                'current_page' => $majors->currentPage(),
+                'last_page' => $majors->lastPage(),
+                'total' => $majors->total()
+            ]
+        ]);
     }
 
     public function store(Request $request)
@@ -30,9 +48,9 @@ class MajorController extends Controller
     public function update(Request $request, $id)
     {
         $major = Major::findOrFail($id);
-        
+
         $validated = $request->validate([
-            'code' => 'required|unique:majors,code,'.$id,
+            'code' => 'required|unique:majors,code,' . $id,
             'name' => 'required',
             'head_of_program_id' => 'nullable|exists:teachers,id'
         ]);

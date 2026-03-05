@@ -11,26 +11,42 @@ class TeachingScheduleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $schedules = TeachingSchedule::with(['teacher', 'classroom', 'subject'])
-            ->orderBy('start_time')
-            ->get();
+        $query = TeachingSchedule::with(['teacher', 'classroom', 'subject']);
 
-        $sortedSchedules = $schedules->sortBy(function ($schedule) {
-            $days = [
-                'senin' => 1,
-                'selasa' => 2,
-                'rabu' => 3,
-                'kamis' => 4,
-                'jumat' => 5,
-                'sabtu' => 6,
-                'minggu' => 7
-            ];
-            return $days[$schedule->day] ?? 99;
-        })->values();
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('teacher', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
 
-        return response()->json(['success' => true, 'data' => $sortedSchedules]);
+        // Trik jitu urutin hari di SQLite/MySQL langsung dari Database!
+        $query->orderByRaw("
+            CASE day
+                WHEN 'senin' THEN 1
+                WHEN 'selasa' THEN 2
+                WHEN 'rabu' THEN 3
+                WHEN 'kamis' THEN 4
+                WHEN 'jumat' THEN 5
+                WHEN 'sabtu' THEN 6
+                WHEN 'minggu' THEN 7
+                ELSE 8
+            END
+        ")->orderBy('start_time');
+
+        $schedules = $query->paginate(10);
+
+        return response()->json([
+            'success' => true, 
+            'data' => $schedules->items(),
+            'meta' => [
+                'current_page' => $schedules->currentPage(),
+                'last_page' => $schedules->lastPage(),
+                'total' => $schedules->total()
+            ]
+        ]);
     }
 
     /**
