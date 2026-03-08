@@ -30,7 +30,7 @@ class TeacherSeeder extends Seeder
                         'name'  => $guru['nama'],
                         'email' => $guru['email'] ?? null,
                         'jenis_kelamin' => $guru['jenis_kelamin'],
-                        'password' => Hash::make('12345678'),
+                        'password' => Hash::make('password'),
                         'photo_url' => $guru['photo'] ?? null,
                         'is_active' => true,
                     ]

@@ -47,7 +47,7 @@ class TeacherController extends Controller
             'nip' => $request->nip,
             'email' => $request->email,
             'jenis_kelamin' => $request->jenis_kelamin,
-            'password' => Hash::make('12345678'),
+            'password' => Hash::make('password'),
             'is_active' => true
         ]);
 

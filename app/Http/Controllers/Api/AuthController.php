@@ -41,11 +41,13 @@ class AuthController extends Controller
     public function loginGuru(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'login' => 'required|string',
             'password' => 'required',
         ]);
 
-        $teacher = Teacher::where('email', $request->email)->first();
+        $teacher = Teacher::where('email', $request->login)
+            ->orWhere('nip', $request->login)
+            ->first();
 
         if (!$teacher || !Hash::check($request->password, $teacher->password)) {
             return response()->json(['message' => 'Email atau Password salah'], 401);

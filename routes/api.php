@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\Api\AcademicYearController;
 use App\Http\Controllers\Api\ClassroomController;
 use App\Http\Controllers\Api\MajorController;
+use App\Http\Controllers\Api\SchoolLocationController;
 use App\Http\Controllers\Api\SubjectController;
 use App\Http\Controllers\Api\TeachingJournalController;
 use App\Http\Controllers\Api\TeachingScheduleController;
@@ -39,6 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('classrooms', ClassroomController::class);
     Route::apiResource('work-schedules', WorkScheduleController::class)->only(['index', 'update']);
     Route::apiResource('teaching-schedules', TeachingScheduleController::class);
+    Route::apiResource('school-locations', SchoolLocationController::class);
 
     //Jurnal Mengajar
     Route::apiResource('teaching-journals', TeachingJournalController::class);
