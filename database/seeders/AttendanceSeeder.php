@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Attendance;
 use App\Models\Teacher;
+use App\Models\LeaveRequest;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
@@ -12,82 +13,34 @@ class AttendanceSeeder extends Seeder
 {
     public function run(): void
     {
-        // Ambil semua guru yang ada
         $teachers = Teacher::all();
-
-        if ($teachers->isEmpty()) {
-            $this->command->info('data gurunya kosong! Isi table teachers dulu ya');
-            return;
-        }
-
-        // Kita buat data untuk 1 tahun ke belakang sampai hari ini
-        $startDate = Carbon::now()->subYear(); 
+        $startDate = Carbon::now()->subYear();
         $endDate = Carbon::now();
         $period = CarbonPeriod::create($startDate, $endDate);
 
         $data = [];
 
         foreach ($period as $date) {
-            // Kita skip hari Sabtu dan Minggu ya, kan sekolah libur~ 
-            if ($date->isWeekend()) {
-                continue;
-            }
+            if ($date->isWeekend()) continue;
+
+            $dateString = $date->format('Y-m-d');
 
             foreach ($teachers as $teacher) {
-                // Simulasi: 10% kemungkinan guru tidak masuk (izin/sakit/alpa)
-                $absentChance = rand(1, 100);
-                
-                if ($absentChance <= 10) {
-                    $statusOptions = ['izin', 'sakit', 'alpa'];
-                    $data[] = [
-                        'teacher_id'    => $teacher->id,
-                        'date'          => $date->format('Y-m-d'),
-                        'check_in'      => null,
-                        'check_out'     => null,
-                        'method'        => null,
-                        'status'        => $statusOptions[array_rand($statusOptions)],
-                        'late_duration' => 0,
-                        'created_at'    => $date,
-                        'updated_at'    => $date,
-                    ];
-                    continue;
+                // SINKRONISASI: Cek apakah ada Izin yang disetujui (Approved) untuk hari ini
+                $approvedLeave = LeaveRequest::where('teacher_id', $teacher->id)
+                    ->where('status', 'approved')
+                    ->whereDate('start_date', '<=', $dateString)
+                    ->whereDate('end_date', '>=', $dateString)
+                    ->first();
+
+                if ($approvedLeave) {
+                    // Jika ada izin disetujui, catat status sesuai tipe izin (sakit/izin)
+                    $data[] = $this->formatRow($teacher->id, $date, null, null, $approvedLeave->type, 0);
+                } else {
+                    // Jika tidak ada izin, jalankan logika absensi normal (Hadir/Telat/Alpa)
+                    $this->processNormalAttendance($data, $teacher, $date);
                 }
 
-                // Tentukan jam masuk (random antara 06:30 sampai 08:15)
-                $checkInTime = Carbon::createFromFormat('Y-m-d H:i:s', $date->format('Y-m-d') . ' 00:00:00');
-                $checkInTime->addHours(6)->addMinutes(rand(30, 135)); // 06:30 + (0-105 menit)
-
-                $limitHadir = Carbon::createFromFormat('Y-m-d H:i:s', $date->format('Y-m-d') . ' 07:00:00');
-                $limitAlpa  = Carbon::createFromFormat('Y-m-d H:i:s', $date->format('Y-m-d') . ' 08:00:00');
-
-                $status = 'hadir';
-                $lateDuration = 0;
-
-                // Logika status berdasarkan jam masuk (sesuai controller kamu)
-                if ($checkInTime->gt($limitAlpa)) {
-                    $status = 'alpa';
-                } elseif ($checkInTime->gt($limitHadir)) {
-                    $status = 'telat';
-                    $lateDuration = $checkInTime->diffInMinutes($limitHadir);
-                }
-
-                // Jam pulang (random antara jam 15:00 sampai 17:00)
-                $checkOutTime = Carbon::createFromFormat('Y-m-d H:i:s', $date->format('Y-m-d') . ' 15:00:00')
-                                ->addMinutes(rand(0, 120));
-
-                $data[] = [
-                    'teacher_id'    => $teacher->id,
-                    'date'          => $date->format('Y-m-d'),
-                    'check_in'      => $checkInTime->format('H:i:s'),
-                    'check_out'     => ($status !== 'alpa') ? $checkOutTime->format('H:i:s') : null,
-                    'method'        => rand(0, 1) ? 'rfid' : 'face', // Random metode rfid atau wajah
-                    'status'        => $status,
-                    'late_duration' => $lateDuration,
-                    'created_at'    => $date,
-                    'updated_at'    => $date,
-                ];
-
-                // Biar nggak memory limit kalau datanya ribuan, kita insert per 100 data
                 if (count($data) >= 100) {
                     Attendance::insert($data);
                     $data = [];
@@ -95,11 +48,44 @@ class AttendanceSeeder extends Seeder
             }
         }
 
-        // Insert sisa datanya
-        if (!empty($data)) {
-            Attendance::insert($data);
+        if (!empty($data)) Attendance::insert($data);
+        $this->command->info('Data Absensi telah berhasil disinkronkan dengan data Pengajuan Cuti.');
+    }
+
+    private function processNormalAttendance(&$data, $teacher, $date)
+    {
+        $checkInTime = $date->copy()->setTime(6, 0);
+        $dist = rand(1, 100);
+
+        // Mayoritas datang pagi (95%) sisanya alpa mendadak/unplanned (5%)
+        if ($dist <= 5) {
+            $data[] = $this->formatRow($teacher->id, $date, null, null, 'alpa', 0);
+            return;
         }
 
-        $this->command->info('Beres! Data absen setahun sudah masuk ke database. Capek juga ya... 💋');
+        // Penentuan jam masuk (6:00 - 7:59)
+        $checkInTime->addMinutes(rand(0, 119));
+        $limitHadir = $date->copy()->setTime(7, 0, 0);
+
+        $status = $checkInTime->gt($limitHadir) ? 'telat' : 'hadir';
+        $late = $status === 'telat' ? $checkInTime->diffInMinutes($limitHadir) : 0;
+        $out = $date->copy()->setTime(15, 0)->addMinutes(rand(5, 60))->format('H:i:s');
+
+        $data[] = $this->formatRow($teacher->id, $date, $checkInTime->format('H:i:s'), $out, $status, $late, rand(0, 1) ? 'rfid' : 'face');
+    }
+
+    private function formatRow($tid, $d, $in, $out, $stat, $late, $met = null)
+    {
+        return [
+            'teacher_id' => $tid,
+            'date' => $d->format('Y-m-d'),
+            'check_in' => $in,
+            'check_out' => $out,
+            'method' => $met,
+            'status' => $stat,
+            'late_duration' => $late,
+            'created_at' => $d,
+            'updated_at' => $d,
+        ];
     }
 }

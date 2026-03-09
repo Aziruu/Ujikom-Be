@@ -18,9 +18,22 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         $this->call([
+            // Data Dasar & Akun
             UserSeeder::class,
             WorkScheduleSeeder::class,
+
+            // Data Master (Induk)
             TeacherSeeder::class,
+            SubjectSeeder::class,
+            MajorSeeder::class,
+            AcademicYearSeeder::class,
+
+            // Data Relasi
+            ClassroomSeeder::class,
+
+            // Data Operasional
+            LeaveRequestSeeder::class,
+            AttendanceSeeder::class,
         ]);
     }
 }

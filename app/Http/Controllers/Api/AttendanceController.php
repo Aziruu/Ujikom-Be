@@ -57,11 +57,11 @@ class AttendanceController extends Controller
         $jamBolehPulang = Carbon::createFromTime(15, 0, 0, 'Asia/Jakarta');
 
         $request->validate([
-            'method'     => 'required|in:rfid,face,qrcode,manual',
+            'method'     => 'required|in:rfid,face,manual',
             'rfid_uid'   => 'required_if:method,rfid',
             'teacher_id' => 'required_if:method,manual,face|exists:teachers,id',
-            'latitude'   => 'required_if:method,manual|numeric',
-            'longitude'  => 'required_if:method,manual|numeric',
+            'latitude'   => 'required_if:method,manual, face|numeric',
+            'longitude'  => 'required_if:method,manual, face|numeric',
             'photo'      => 'nullable|string',
         ]);
 
@@ -70,7 +70,7 @@ class AttendanceController extends Controller
          * VALIDASI MULTI-LOKASI KAMPUS
          * =========================================
          */
-        if ($request->method === 'manual') {
+        if ($request->method === 'manual' || $request->method === 'face') {
             // Ambil semua data kampus dari database
             $locations = SchoolLocation::all();
 
@@ -112,8 +112,6 @@ class AttendanceController extends Controller
                 ], 422);
             }
         }
-
-        // --- Sisa logika di bawah ini persis kayak sebelumnya ya sayang ---
 
         $teacher = $request->method === 'manual' || $request->method === 'face'
             ? Teacher::find($request->teacher_id)
