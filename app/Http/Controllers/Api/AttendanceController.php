@@ -22,6 +22,7 @@ class AttendanceController extends Controller
     {
         $query = Attendance::with('teacher')->latest();
 
+        // Filter pencarian guru
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('teacher', function ($q) use ($search) {
@@ -30,8 +31,28 @@ class AttendanceController extends Controller
             });
         }
 
-        if ($request->filled('date')) {
+        // Filter Periode Cepat (Hari ini, Bulan ini, Tahun ini)
+        if ($request->filled('period')) {
+            $now = Carbon::now('Asia/Jakarta');
+            if ($request->period === 'today') {
+                $query->whereDate('date', $now->toDateString());
+            } elseif ($request->period === 'month') {
+                $query->whereMonth('date', $now->month)->whereYear('date', $now->year);
+            } elseif ($request->period === 'year') {
+                $query->whereYear('date', $now->year);
+            }
+        } 
+        // Filter Tanggal Spesifik
+        elseif ($request->filled('date')) {
             $query->whereDate('date', $request->date);
+        }
+
+        // JIKA MODE EXPORT: Kembalikan SEMUA data tanpa pagination (limit)
+        if ($request->boolean('export')) {
+            return response()->json([
+                'success' => true,
+                'data' => $query->get()
+            ]);
         }
 
         $perPage = $request->query('per_page', 10);
