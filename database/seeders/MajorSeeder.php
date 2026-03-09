@@ -31,7 +31,7 @@ class MajorSeeder extends Seeder
             ],
             [
                 'code' => 'PS',
-                'name' => 'Perbankan Syariah',
+                'name' => 'Pemesaran dan Bisnis',
                 'head_of_program_id' => null,
             ],
             [
