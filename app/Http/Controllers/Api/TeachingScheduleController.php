@@ -22,6 +22,11 @@ class TeachingScheduleController extends Controller
             });
         }
 
+        // Filter spesifik untuk guru yang sedang login
+        if ($request->filled('teacher_id')) {
+            $query->where('teacher_id', $request->teacher_id);
+        }
+
         // Trik jitu urutin hari di SQLite/MySQL langsung dari Database!
         $query->orderByRaw("
             CASE day

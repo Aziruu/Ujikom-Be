@@ -31,6 +31,11 @@ class AttendanceController extends Controller
             });
         }
 
+        // Filter spesifik untuk guru yang sedang login
+        if ($request->filled('teacher_id')) {
+            $query->where('teacher_id', $request->teacher_id);
+        }
+
         // Filter Periode Cepat (Hari ini, Bulan ini, Tahun ini)
         if ($request->filled('period')) {
             $now = Carbon::now('Asia/Jakarta');
