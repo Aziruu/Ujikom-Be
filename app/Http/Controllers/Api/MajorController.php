@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 
 class MajorController extends Controller
 {
+    /**
+     * @brief Menampilkan daftar jurusan.
+     * @details Mendukung fitur pencarian berdasarkan nama atau kode jurusan serta pagination.
+     * @param \Illuminate\Http\Request $request (search)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request)
     {
         $query = Major::with('headOfProgram');
@@ -32,6 +38,11 @@ class MajorController extends Controller
         ]);
     }
 
+    /**
+     * @brief Menyimpan data jurusan baru.
+     * @param \Illuminate\Http\Request $request (code, name, head_of_program_id)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -45,6 +56,12 @@ class MajorController extends Controller
         return response()->json(['success' => true, 'message' => 'Jurusan berhasil dibuat.']);
     }
 
+    /**
+     * @brief Memperbarui data jurusan.
+     * @param \Illuminate\Http\Request $request Data update.
+     * @param int $id ID Jurusan.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, $id)
     {
         $major = Major::findOrFail($id);
@@ -60,6 +77,11 @@ class MajorController extends Controller
         return response()->json(['success' => true, 'message' => 'Jurusan berhasil diupdate.']);
     }
 
+    /**
+     * @brief Menghapus data jurusan.
+     * @param int $id ID Jurusan.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy($id)
     {
         Major::destroy($id);

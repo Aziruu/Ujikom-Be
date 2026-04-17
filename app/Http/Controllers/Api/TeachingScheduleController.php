@@ -9,7 +9,10 @@ use Illuminate\Http\Request;
 class TeachingScheduleController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @brief Menampilkan daftar jadwal mengajar.
+     * @details Mengurutkan data secara kustom mulai dari hari Senin hingga Minggu, lalu berdasarkan jam mulai.
+     * @param \Illuminate\Http\Request $request (search, teacher_id)
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
@@ -44,7 +47,7 @@ class TeachingScheduleController extends Controller
         $schedules = $query->paginate(10);
 
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'data' => $schedules->items(),
             'meta' => [
                 'current_page' => $schedules->currentPage(),
@@ -55,7 +58,9 @@ class TeachingScheduleController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @brief Membuat jadwal mengajar baru untuk guru.
+     * @param \Illuminate\Http\Request $request (teacher_id, classroom_id, subject_id, day, start_time, end_time)
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {

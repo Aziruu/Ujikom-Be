@@ -8,15 +8,28 @@ use App\Models\AcademicYear;
 
 class AcademicYearController extends Controller
 {
+    /**
+     * @brief Mengambil daftar tahun ajaran.
+     * @details Mengurutkan data berdasarkan status aktif (is_active) di paling atas, 
+     * kemudian berdasarkan nama secara descending.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
         // Urutkan yang aktif paling atas, lalu berdasarkan nama descending
         $data = AcademicYear::orderBy('is_active', 'desc')
-                            ->orderBy('name', 'desc')
-                            ->get();
+            ->orderBy('name', 'desc')
+            ->get();
         return response()->json(['success' => true, 'data' => $data]);
     }
 
+    /**
+     * @brief Menyimpan data tahun ajaran baru.
+     * @details Jika tahun ajaran baru diset sebagai aktif (is_active = true), 
+     * maka sistem otomatis menonaktifkan semua tahun ajaran lainnya.
+     * @param \Illuminate\Http\Request $request Data payload (name, years, semester, is_active).
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -40,6 +53,14 @@ class AcademicYearController extends Controller
         ]);
     }
 
+    /**
+     * @brief Memperbarui data tahun ajaran.
+     * @details Termasuk logika switch active; jika data ini diaktifkan, 
+     * data tahun ajaran lain akan dinonaktifkan.
+     * @param \Illuminate\Http\Request $request Data update.
+     * @param int $id ID Tahun ajaran.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, $id)
     {
         $academicYear = AcademicYear::findOrFail($id);

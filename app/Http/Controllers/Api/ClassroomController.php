@@ -9,7 +9,8 @@ use App\Models\Classroom;
 class ClassroomController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @brief Menampilkan daftar kelas beserta relasi Major, Academic Year, dan Wali Kelas.
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -20,7 +21,9 @@ class ClassroomController extends Controller
 
 
     /**
-     * Store a newly created resource in storage.
+     * @brief Membuat data kelas baru.
+     * @param \Illuminate\Http\Request $request (name, grade_level, major_id, academic_year_id, homeroom_teacher_id).
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -39,7 +42,10 @@ class ClassroomController extends Controller
 
 
     /**
-     * Update the specified resource in storage.
+     * @brief Memperbarui informasi data kelas.
+     * @param \Illuminate\Http\Request $request Data update.
+     * @param string $id ID Kelas.
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, string $id)
     {

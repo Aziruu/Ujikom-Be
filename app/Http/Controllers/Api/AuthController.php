@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     // Login Function Admin
+    /**
+     * @brief Proses autentikasi untuk level Administrator.
+     * @param \Illuminate\Http\Request $request (email, password).
+     * @return \Illuminate\Http\JsonResponse Berisi token akses dan data user.
+     */
     public function loginAdmin(Request $request)
     {
         $request->validate([
@@ -38,6 +43,11 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * @brief Proses autentikasi untuk level Guru (menggunakan Email atau NIP).
+     * @param \Illuminate\Http\Request $request (login, password).
+     * @return \Illuminate\Http\JsonResponse Berisi token akses dan data guru.
+     */
     public function loginGuru(Request $request)
     {
         $request->validate([
@@ -62,6 +72,10 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * @brief Menghapus current access token (Logout).
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function logout(Request $request)
     {
         // ⬇️ FIX TYPO: AccsessToken → AccessToken

@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Hash;
 
 class TeacherController extends Controller
 {
+    /**
+     * @brief Menampilkan daftar guru dengan fitur pencarian nama atau NIP.
+     * @param \Illuminate\Http\Request $request (search)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request)
     {
         $query = Teacher::query();
@@ -23,7 +28,7 @@ class TeacherController extends Controller
         $teachers = $query->latest()->paginate(10);
 
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'data' => $teachers->items(),
             'meta' => [
                 'current_page' => $teachers->currentPage(),
@@ -33,6 +38,12 @@ class TeacherController extends Controller
         ]);
     }
 
+    /**
+     * @brief Mendaftarkan data guru baru ke sistem.
+     * @details Password default akan diset otomatis menjadi 'password'.
+     * @param \Illuminate\Http\Request $request (name, email, nip, jenis_kelamin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -95,6 +106,12 @@ class TeacherController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * @brief Mengaitkan nomor UID kartu RFID ke akun guru tertentu.
+     * @param \Illuminate\Http\Request $request (rfid_uid)
+     * @param int $id ID Guru.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateRfid(Request $request, $id)
     {
         $request->validate([
@@ -114,6 +131,13 @@ class TeacherController extends Controller
         ]);
     }
 
+    /**
+     * @brief Mendaftarkan data wajah (Face Recognition) dan foto profil guru.
+     * @details Menyimpan descriptor matematis wajah dan file foto fisik ke storage.
+     * @param \Illuminate\Http\Request $request (face_descriptor, photo dalam base64)
+     * @param int $id ID Guru.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateFace(Request $request, $id)
     {
         // Validasi: face_descriptor WAJIB, photo OPSIONAL (tapi sebaiknya dikirim)

@@ -8,11 +8,20 @@ use Illuminate\Http\Request;
 
 class SubjectController extends Controller
 {
+    /**
+     * @brief Menampilkan daftar semua mata pelajaran.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
         return response()->json(['success' => true, 'data' => Subject::latest()->get()]);
     }
 
+    /**
+     * @brief Menambahkan mata pelajaran baru.
+     * @param \Illuminate\Http\Request $request (name)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
         $request->validate(['name' => 'required|unique:subjects,name']);
@@ -20,10 +29,16 @@ class SubjectController extends Controller
         return response()->json(['success' => true, 'message' => 'Mapel ditambahkan.']);
     }
 
+    /**
+     * @brief Memperbarui nama mata pelajaran.
+     * @param \Illuminate\Http\Request $request Data update.
+     * @param int $id ID Mapel.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, $id)
     {
         $subject = Subject::findOrFail($id);
-        $request->validate(['name' => 'required|unique:subjects,name,'.$id]);
+        $request->validate(['name' => 'required|unique:subjects,name,' . $id]);
         $subject->update($request->all());
         return response()->json(['success' => true, 'message' => 'Mapel diupdate.']);
     }

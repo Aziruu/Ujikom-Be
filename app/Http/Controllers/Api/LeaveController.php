@@ -9,9 +9,28 @@ use Illuminate\Http\Request;
 class LeaveController extends Controller
 {
     /**
-     * Guru mengajukan cuti
-     * Status default: pending
+     * @brief Menampilkan daftar pengajuan cuti untuk Admin.
+     * @details Mendukung filter berdasarkan status (pending, approved, rejected) dan pagination.
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
+    public function index(Request $request)
+    {
+        $query = LeaveRequest::with('teacher')->latest();
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        return response()->json($query->paginate(10));
+    }
+    /**
+     * @brief Proses pengajuan cuti atau izin oleh guru.
+     * @details Menangani unggahan file lampiran (sakit/izin) dan menyimpannya di storage public.
+     * @param \Illuminate\Http\Request $request (teacher_id, start_date, end_date, reason, type, file).
+     * @return \Illuminate\Http\JsonResponse
+     */
+    
     public function store(Request $request)
     {
         $request->validate([
@@ -45,23 +64,12 @@ class LeaveController extends Controller
         ], 201);
     }
 
-    /**
-     * Admin melihat daftar pengajuan cuti
-     * Bisa difilter status
-     */
-    public function index(Request $request)
-    {
-        $query = LeaveRequest::with('teacher')->latest();
-
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
-        }
-
-        return response()->json($query->paginate(10));
-    }
 
     /**
-     * Admin approve / reject cuti
+     * @brief Verifikasi (Approve/Reject) pengajuan cuti oleh Admin.
+     * @param \Illuminate\Http\Request $request (status, admin_note).
+     * @param int $id ID Pengajuan cuti.
+     * @return \Illuminate\Http\JsonResponse
      */
     public function verify(Request $request, $id)
     {

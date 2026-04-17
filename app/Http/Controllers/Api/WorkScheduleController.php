@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 
 class WorkScheduleController extends Controller
 {
+    /**
+ * @brief Menampilkan pengaturan jam kerja sekolah.
+ * @details Jika data kosong, sistem akan otomatis melakukan inisialisasi default untuk 7 hari.
+ * @return \Illuminate\Http\JsonResponse
+ */
     public function index()
     {
         $schedules = WorkSchedule::all();
@@ -29,6 +34,12 @@ class WorkScheduleController extends Controller
         return response()->json(['success' => true, 'data' => $schedules]);
     }
 
+    /**
+ * @brief Memperbarui pengaturan jam kerja (jam masuk, pulang, dan toleransi telat).
+ * @param \Illuminate\Http\Request $request (start_time, end_time, late_tolerance, is_holiday)
+ * @param int $id ID Jadwal kerja.
+ * @return \Illuminate\Http\JsonResponse
+ */
     public function update(Request $request, $id)
     {
         $schedule = WorkSchedule::findOrFail($id);

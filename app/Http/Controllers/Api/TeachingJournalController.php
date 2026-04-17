@@ -9,7 +9,10 @@ use Illuminate\Http\Request;
 class TeachingJournalController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @brief Menampilkan daftar jurnal mengajar yang sudah dikirim.
+     * @details Dilengkapi filter pencarian berdasarkan nama guru atau kelas.
+     * @param \Illuminate\Http\Request $request (search)
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
@@ -28,7 +31,7 @@ class TeachingJournalController extends Controller
         $journals = $query->latest()->paginate(10);
 
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'data' => $journals->items(),
             'meta' => [
                 'current_page' => $journals->currentPage(),
@@ -47,7 +50,10 @@ class TeachingJournalController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @brief Menyimpan jurnal kegiatan belajar mengajar (KBM).
+     * @details Menangani unggahan hingga 3 foto bukti kegiatan dan koordinat lokasi saat submit.
+     * @param \Illuminate\Http\Request $request (teacher_id, classroom_id, date, topic, photos[], latitude, longitude)
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -118,7 +124,9 @@ class TeachingJournalController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @brief Menghapus jurnal mengajar beserta file foto fisiknya dari storage.
+     * @param string $id ID Jurnal.
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(string $id)
     {
@@ -139,6 +147,12 @@ class TeachingJournalController extends Controller
     }
 
     // Fungsi khusus buat ACC / Tolak Jurnal
+    /**
+     * @brief Verifikasi validitas jurnal mengajar oleh Admin.
+     * @param \Illuminate\Http\Request $request (status: valid/ditolak)
+     * @param int $id ID Jurnal.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function verify(Request $request, $id)
     {
         $request->validate(['status' => 'required|in:valid,ditolak']);

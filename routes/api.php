@@ -7,8 +7,13 @@ use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\Api\AcademicYearController;
+use App\Http\Controllers\Api\AssessmentCategoryController;
+use App\Http\Controllers\Api\AssessmentController;
 use App\Http\Controllers\Api\ClassroomController;
+use App\Http\Controllers\Api\LeaderboardController;
 use App\Http\Controllers\Api\MajorController;
+use App\Http\Controllers\Api\MarketplaceController;
+use App\Http\Controllers\Api\PointRuleController;
 use App\Http\Controllers\Api\SchoolLocationController;
 use App\Http\Controllers\Api\SubjectController;
 use App\Http\Controllers\Api\TeachingJournalController;
@@ -45,6 +50,29 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //Jurnal Mengajar
     Route::apiResource('teaching-journals', TeachingJournalController::class);
     Route::patch('teaching-journals/{id}/verify', [\App\Http\Controllers\Api\TeachingJournalController::class, 'verify']);
+
+    //  Fitur Penilaian
+    Route::apiResource('assessment-categories', AssessmentCategoryController::class);
+    Route::get('assessments/teachers-to-assess', [AssessmentController::class, 'getTeachersToAssess']);
+    Route::get('assessments/radar-chart/{teacherId}', [AssessmentController::class, 'getRadarChartData']);
+    Route::get('assessments/history/{teacherId}', [AssessmentController::class, 'getTeacherHistory']);
+    Route::apiResource('assessments', AssessmentController::class);
+
+    // FITUR MARKETPLACE (DOMPET INTEGRITAS)
+    // Untuk Mobile (Guru)
+    Route::get('/marketplace/items', [MarketplaceController::class, 'index']);
+    Route::post('/marketplace/buy', [MarketplaceController::class, 'buyToken']);
+
+    // Untuk Web Admin (React)
+    Route::get('/marketplace', [MarketplaceController::class, 'adminIndex']);
+    Route::post('/marketplace', [MarketplaceController::class, 'store']);
+    Route::put('/marketplace/{id}', [MarketplaceController::class, 'update']);
+    Route::delete('/marketplace/{id}', [MarketplaceController::class, 'destroy']);
+    Route::get('/leaderboard', [LeaderboardController::class, 'index']);
+
+    //Fitur Point Rule
+    Route::resource('/point-rules', PointRuleController::class);
+    Route::get('/my-wallet', [\App\Http\Controllers\Api\WalletController::class, 'getMyWallet']);
 
     // Cek User Login
     Route::get('/user', function (Request $request) {
