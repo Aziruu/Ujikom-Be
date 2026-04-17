@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('face_descriptor')->nullable();
             $table->string('photo_url')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->integer('point_balance')->default(0);
             $table->timestamps();
         });
     }

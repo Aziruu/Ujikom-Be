@@ -18,7 +18,7 @@ return new class extends Migration
             $table->time('check_in')->nullable();
             $table->time('check_out')->nullable();
             $table->enum('method', ['rfid', 'face', 'qrcode', 'manual'])->nullable();
-            $table->enum('status', ['hadir', 'telat', 'izin', 'sakit', 'alpa'])->default('alpa');
+            $table->enum('status', ['hadir', 'telat', 'izin', 'sakit', 'alpa', 'hadir_token'])->default('alpa');
             $table->integer('late_duration')->default(0);
             $table->timestamps();
         });
