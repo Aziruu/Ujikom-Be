@@ -54,4 +54,18 @@ class Teacher extends Model
     {
         return $this->hasMany(LeaveRequest::class);
     }
+
+    // Relasi: Guru menerima banyak penilaian kinerja
+    public function receivedAssessments()
+    {
+        return $this->hasMany(Assessment::class, 'evaluatee_id');
+    }
+
+    public function pointLedgers() {
+        return $this->hasMany(PointLedgers::class);
+    }
+
+    public function flexibilityTokens() {
+        return $this->hasMany(UserTokens::class);
+    }
 }

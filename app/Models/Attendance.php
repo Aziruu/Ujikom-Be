@@ -31,4 +31,9 @@ class Attendance extends Model
     {
         return $this->belongsTo(Teacher::class);
     }
+
+    public function usedToken()
+    {
+        return $this->hasOne(UserTokens::class, 'used_at_attendance_id');
+    }
 }

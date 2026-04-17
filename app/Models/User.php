@@ -46,4 +46,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // Relasi: User (Admin) memberikan banyak penilaian
+    public function givenAssessments()
+    {
+        return $this->hasMany(Assessment::class, 'evaluator_id');
+    }
 }
