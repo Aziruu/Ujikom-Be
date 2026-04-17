@@ -13,7 +13,7 @@ class LeaderboardController extends Controller
      */
     public function index(Request $request)
     {
-        // Limit 10 data per scroll sesuai request kamu sayang~
+        // Limit 10 data per scroll sesuai request
         $limit = $request->query('limit', 10);
 
         // Top Guru Paling Disiplin

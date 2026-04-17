@@ -65,7 +65,7 @@ class PointRuleController extends Controller
         if (stripos($rule->rule_name, 'alpa') !== false) {
             return response()->json([
                 'success' => false,
-                'message' => 'Aturan Alpa adalah aturan sistem wajib. Tidak boleh dinonaktifkan, Sayang!'
+                'message' => 'Aturan Alpa adalah aturan sistem wajib. Tidak boleh dinonaktifkan'
             ], 403);
         }
 
